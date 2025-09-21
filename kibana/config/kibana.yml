@@ -1,0 +1,25 @@
+# ================= Kibana Server 配置 =================
+server.host: "0.0.0.0"
+server.port: 5601
+
+# 启用 Kibana HTTPS
+server.ssl.enabled: true
+server.ssl.keystore.path: /usr/share/kibana/config/certs/elastic-certificates.p12
+server.ssl.keystore.password: ""
+
+# ================= Elasticsearch 连接配置 =================
+elasticsearch.hosts: ["https://192.168.1.125:9200"]
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "channel"
+
+# 启用 HTTPS 验证 Elasticsearch 证书
+elasticsearch.ssl.certificateAuthorities: [ "/usr/share/kibana/config/certs/elastic-certificates.p12" ]
+#elasticsearch.ssl.verificationMode: certificate
+elasticsearch.ssl.verificationMode: none
+
+# ================= Kibana 其他配置 =================
+logging.root.level: info
+xpack.monitoring.ui.container.elasticsearch.enabled: true
+
+
+xpack.encryptedSavedObjects.encryptionKey: "hG7s9K2bF1dPq4JwzYtLr3Ux8VvM2x9Q"

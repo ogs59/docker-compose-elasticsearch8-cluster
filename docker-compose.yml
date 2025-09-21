@@ -1,0 +1,129 @@
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:$ES_VERSION
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - network.host="0.0.0.0"
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - ELASTIC_PASSWORD=channel
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.keystore.path=certs/elastic-certificates.p12
+      - xpack.security.http.ssl.keystore.password=""
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.keystore.path=certs/elastic-certificates.p12
+      - xpack.security.transport.ssl.truststore.path=certs/elastic-certificates.p12
+      - xpack.security.transport.ssl.keystore.password=""
+      - xpack.security.transport.ssl.truststore.password=""
+    ports:
+      - 9200:9200
+    volumes:
+      - ./elasticsearch/data1:/usr/share/elasticsearch/data
+      - ./elasticsearch/certs:/usr/share/elasticsearch/config/certs:ro
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - elastic
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:$ES_VERSION
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - network.host="0.0.0.0"
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - ELASTIC_PASSWORD=channel
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.keystore.path=certs/elastic-certificates.p12
+      - xpack.security.http.ssl.keystore.password=""
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.keystore.path=certs/elastic-certificates.p12
+      - xpack.security.transport.ssl.truststore.path=certs/elastic-certificates.p12
+      - xpack.security.transport.ssl.keystore.password=""
+      - xpack.security.transport.ssl.truststore.password=""
+    volumes:
+      - ./elasticsearch/data2:/usr/share/elasticsearch/data
+      - ./elasticsearch/certs:/usr/share/elasticsearch/config/certs:ro
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - elastic
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:$ES_VERSION
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - network.host="0.0.0.0"
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2048m -Xmx2048m"
+      - ELASTIC_PASSWORD=channel
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.keystore.path=certs/elastic-certificates.p12
+      - xpack.security.http.ssl.keystore.password=""
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.transport.ssl.keystore.path=certs/elastic-certificates.p12
+      - xpack.security.transport.ssl.truststore.path=certs/elastic-certificates.p12
+      - xpack.security.transport.ssl.keystore.password=""
+      - xpack.security.transport.ssl.truststore.password=""
+    volumes:
+      - ./elasticsearch/data3:/usr/share/elasticsearch/data
+      - ./elasticsearch/certs:/usr/share/elasticsearch/config/certs:ro
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - elastic
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.18.3
+    container_name: kibana
+    volumes:
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      - ./kibana/certs/elastic-certificates.p12:/usr/share/kibana/config/certs/elastic-certificates.p12:ro
+      - ./kibana/kibana-data:/usr/share/kibana/data
+    ports:
+      - 5601:5601
+    networks:
+      - elastic
+    depends_on:
+      - es01
+      - es02
+      - es03
+
+volumes:
+  data01:
+  data02:
+  data03:
+  kibana-data:
+networks:
+  elastic:
+    driver: bridge
