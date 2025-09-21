@@ -5,24 +5,28 @@ docker-compose部署es8集群证书版
 
 1. 修改文件/etc/security/limits.conf，最后添加以下内容。
 
+``` 
  soft nofile 65536
  hard nofile 65536
  soft nproc 32000
  hard nproc 32000
  hard memlock unlimited
  soft memlock unlimited
-
+```
 
 2. 修改文件 /etc/systemd/system.conf ，分别修改以下内容。
 
+```
 DefaultLimitNOFILE=65536
 DefaultLimitNPROC=32000
 DefaultLimitMEMLOCK=infinity
-
+```
 
 3. 修改文件/etc/sysctl.conf文件最后添加一行,即可永久修改.
 
+```
 vm.max_map_count=262144
+```
 
 ### 容器启动前须知
 
