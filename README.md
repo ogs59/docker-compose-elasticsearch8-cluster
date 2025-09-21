@@ -182,4 +182,6 @@ xpack.encryptedSavedObjects.encryptionKey: "hG7s9K2bF1dPq4JwzYtLr3Ux8VvM2x9Q"
 ```
 
 
+### 后话
 
+所有的配置我都已经改好了，使用的时候拉取下来，清空我es kibana的数据，生成2个证书，放进对应目录，改下es的jvm限制和账号就可直接使用了
