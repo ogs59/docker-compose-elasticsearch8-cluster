@@ -1,0 +1,1 @@
+# docker-compose-elasticsearch8-cluster
