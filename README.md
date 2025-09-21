@@ -94,10 +94,92 @@ es要增加相应的证书配置，已经增加到容器变量
 
 ### 三. 容器启动前须知
 
-容器挂载的目录自动生成，启动后会失败，需要修改目录权限
+容器挂载的目录自动生成，启动后会因权限问题启动失败，需要修改目录权限
 
 ```
 chown -R 1000.0 docker-compose-elasticsearch8-cluster
 chmod mod 755 docker-compose-elasticsearch8-cluster
 
 ```
+
+### 四. Kibana配置
+
+kibana8的配置跟7区别很大，很多配置废弃了，调试的时候需要多看日志报错。
+
+kibana8通过默认账号kibana_system去连接es集群,最好不要用其他账号链接，可能对索引有影响。
+
+通过elastic账号修改kibana_system的密码，elastic的密码在es的环境变量中可以找到
+
+
+```
+1. 修改账号密码
+curl -k -u elastic -X POST 'https://192.168.1.125:9200/_security/user/kibana_system/_password' -H 'Content-Type: application/json' -d'
+{
+  "password": "NewPassword123!"
+}'
+
+
+2. 验证账号
+
+
+[root@anolios-01 config]# curl -k -u kibana_system:channel 'https://192.168.1.125:9200/_nodes?filter_path=nodes.*.version,nodes.*.http.publish_address,nodes.*.ip&pretty'
+{
+  "nodes" : {
+    "vlHFIfAnSVKrZbkOFKh0jw" : {
+      "ip" : "192.168.64.4",
+      "version" : "8.18.3",
+      "http" : {
+        "publish_address" : "192.168.64.4:9200"
+      }
+    },
+    "v9lRHYMzTOCSIbfTJsKQzA" : {
+      "ip" : "192.168.64.3",
+      "version" : "8.18.3",
+      "http" : {
+        "publish_address" : "192.168.64.3:9200"
+      }
+    },
+    "zZ_OuD27RgCHeAXuoAJPSQ" : {
+      "ip" : "192.168.64.2",
+      "version" : "8.18.3",
+      "http" : {
+        "publish_address" : "192.168.64.2:9200"
+      }
+    }
+  }
+}
+
+
+3. kibana的配置
+调试了半天，懒的改进环境变量了，强迫症的可以改改
+
+# ================= Kibana Server 配置 =================
+server.host: "0.0.0.0"
+server.port: 5601
+
+# 启用 Kibana HTTPS
+server.ssl.enabled: true
+server.ssl.keystore.path: /usr/share/kibana/config/certs/elastic-certificates.p12
+server.ssl.keystore.password: ""
+
+# ================= Elasticsearch 连接配置 =================
+elasticsearch.hosts: ["https://192.168.1.125:9200"]
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "channel"
+
+# 启用 HTTPS 验证 Elasticsearch 证书
+elasticsearch.ssl.certificateAuthorities: [ "/usr/share/kibana/config/certs/elastic-certificates.p12" ]
+#elasticsearch.ssl.verificationMode: certificate
+elasticsearch.ssl.verificationMode: none
+
+# ================= Kibana 其他配置 =================
+logging.root.level: info
+xpack.monitoring.ui.container.elasticsearch.enabled: true
+
+
+xpack.encryptedSavedObjects.encryptionKey: "hG7s9K2bF1dPq4JwzYtLr3Ux8VvM2x9Q"
+
+```
+
+
+
